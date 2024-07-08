@@ -1,6 +1,7 @@
 from app import db
 from sqlalchemy.dialects.postgresql import UUID
 import uuid
+from werkzeug.security import generate_password_hash, check_password_hash
 
 user_organisation = db.Table('user_organisation',
     db.Column('userId', UUID(as_uuid=True), db.ForeignKey('users.userId', ondelete='CASCADE')),
@@ -18,6 +19,16 @@ class User(db.Model):
     phone = db.Column(db.String(20))
 
     organisations = db.relationship('Organisation', secondary=user_organisation, back_populates='users')
+
+    #To get human readable object of our database object
+    def __repr__(self):
+        return f"<User {self.user_id}>"
+    
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
 
 
 class Organisation(db.Model):
